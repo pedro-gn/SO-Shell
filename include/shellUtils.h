@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <string.h>
 #include <wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define BUFFER_SIZE 1024
 #define COMMAND_DELIMITERS " \t\r\n\a"

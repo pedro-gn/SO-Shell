@@ -56,23 +56,51 @@ char **split_command(char *command){
 int shell_execute(char **args) {
     pid_t pid;
     int status;
+    int fd_in, fd_out;
+    char* input_file = NULL;
+    char* output_file = NULL;
 
-    if (args[0] == NULL) {
-        return 1;
-    }
-    
-    if ((pid = fork()) == 0) {
-        if (execvp(args[0], args) == -1) {
-            perror("shell");
+    // Procura pelos símbolos de redirecionamento de entrada e saída
+    for (int i = 0; args[i] != NULL; i++) {
+        if (strcmp(args[i], "<=") == 0) {
+            // Símbolo de redirecionamento de entrada encontrado
+            input_file = args[i + 1];
+            args[i] = NULL;
+        } else if (strcmp(args[i], "=>") == 0) {
+            // Símbolo de redirecionamento de saída encontrado
+            output_file = args[i + 1];
+            args[i] = NULL;
         }
-        exit(EXIT_FAILURE);
-
-    } else if (pid < 0) {
-        perror("shell");
-
-    } else {
-        waitpid(pid, &status, WUNTRACED);
     }
 
-    return 1;
+    pid = fork();
+
+    if (pid == 0) {
+        // Processo filho
+        if (input_file != NULL) {
+            // Redireciona a entrada do arquivo
+            fd_in = open(input_file, O_RDONLY);
+            dup2(fd_in, STDIN_FILENO);
+            close(fd_in);
+        }
+        if (output_file != NULL) {
+            // Redireciona a saída para o arquivo
+            fd_out = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            dup2(fd_out, STDOUT_FILENO);
+            close(fd_out);
+        }
+
+        execvp(args[0], args);
+        printf("Erro ao executar o comando\n");
+        exit(EXIT_FAILURE);
+    } else if (pid < 0) {
+        // Erro ao criar processo filho
+        printf("Erro ao criar processo filho\n");
+    } else {
+        // Processo pai
+        do {
+            waitpid(pid, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+    return 1;   
 }
