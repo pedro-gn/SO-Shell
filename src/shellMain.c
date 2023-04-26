@@ -3,18 +3,20 @@
 
 void shellMain(){
     char *command = NULL;
-    char **commandArgs = NULL;
+    char **commands = NULL;
     int status;
 
 
     while(true){
         typePrompt();
         command = readCommand(&command);
-        commandArgs = split_command(command);
-        status = shell_execute(commandArgs);
 
+        commands = split_command(command, PIPE_DELIM);
+
+        status = shell_execute(commands);
+        
         free(command);
-        free(commandArgs);
+        free(commands);
     }
     
 }

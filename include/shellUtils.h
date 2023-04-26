@@ -12,13 +12,16 @@
 #include <fcntl.h>
 
 #define BUFFER_SIZE 1024
-#define COMMAND_DELIMITERS " \t\r\n\a"
+#define PIPE_DELIM "|"
+#define SPACE_DELIM " \t\r\n\a"
 
 void typePrompt();
 
 char *readCommand();
 
-char **split_command(char *command);
+void exec_single_command(char *command);
+
+char **split_command(char *command, char *delim);
 
 int shell_execute(char **args);
 
