@@ -112,7 +112,7 @@ void exec_piped_commands(char *command1, char *command2){
     char **args2 = split_command(command2, SPACE_DELIM);
 
     int pipe_fd[2];
-
+    char buffer[BUFFER_SIZE] = "testeste";
     int fd_in, fd_out;
     char* input_file = NULL;
     char* output_file = NULL;
@@ -154,7 +154,8 @@ void exec_piped_commands(char *command1, char *command2){
         } 
 
         // Redireciona a saida padrão para o pipe
-        close(pipe_fd[0]);
+
+        close(pipe_fd[0]);  
         dup2(pipe_fd[1], STDOUT_FILENO);
         close(pipe_fd[1]);
 
@@ -167,9 +168,6 @@ void exec_piped_commands(char *command1, char *command2){
         printf("Erro ao criar processo filho\n");
         return;
     }
-
-    waitpid(pid1, &status, 0);
-
 
     // Segundo Comando
     pid2 = fork();
@@ -186,6 +184,7 @@ void exec_piped_commands(char *command1, char *command2){
         close(pipe_fd[1]);
         dup2(pipe_fd[0], STDIN_FILENO);
         close(pipe_fd[0]);
+        sleep(0.5);
         // Executa o segundo comando
         execvp(args2[0], args2);
         printf("Erro ao executar o comando\n");
@@ -196,10 +195,14 @@ void exec_piped_commands(char *command1, char *command2){
         return;
     }
 
-
+    // Processo pai
+    close(pipe_fd[0]); // Fecha o descritor de leitura do pipe, que não será usado pelo pai
+    close(pipe_fd[1]); // Fecha o descritor de escrita do pipe, que não será usado pelo pai
 
 
     waitpid(pid2, &status, 0);
+    waitpid(pid1, &status, 0);
+
 
     free(args1);
     free(args2);
@@ -207,11 +210,10 @@ void exec_piped_commands(char *command1, char *command2){
 
 int shell_execute(char **args) {
 
-    int status;
-
     for(int i = 0; args[i] != NULL; i++){
         if( args[i+1] != NULL){
-            //PIPE
+            exec_piped_commands(args[i], args[i+1]);
+            i++;
         } 
         else{
             exec_single_command(args[i]);
@@ -219,6 +221,6 @@ int shell_execute(char **args) {
     }
 
 
-    return 1;
+    return 0;
     
 }
