@@ -25,5 +25,6 @@ char **split_command(char *command, char *delim);
 
 int shell_execute(char **args);
 
+void exec_piped_commands(char *command1, char *command2);
 
 #endif
