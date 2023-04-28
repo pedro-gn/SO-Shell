@@ -23,7 +23,7 @@ void exec_single_command(char *command);
 
 char **split_command(char *command, char *delim);
 
-int shell_execute(char **args);
+int shell_execute(char **commands);
 
 void exec_piped_commands(char *command1, char *command2);
 

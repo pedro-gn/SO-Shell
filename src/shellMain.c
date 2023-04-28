@@ -15,6 +15,8 @@ void shellMain(){
 
         status = shell_execute(commands);
         
+        
+
         free(command);
         free(commands);
     }
