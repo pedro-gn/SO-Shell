@@ -38,6 +38,7 @@ char **split_command(char *command, char *delim){
             tokens = realloc(tokens, buffer_size * sizeof(char *));
             if (!tokens) {
                 fprintf(stderr, "shell: allocation error\n");
+                free(tokens);
                 exit(EXIT_FAILURE);
             }
         }
@@ -51,6 +52,10 @@ char **split_command(char *command, char *delim){
 
 
 int count_pipes(char **commands){
+    if(commands == NULL){
+        return 0;
+    }
+
     int count = 0;
     for(int i = 0; commands[i] != NULL; i++){
         count++;

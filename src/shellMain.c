@@ -11,10 +11,16 @@ void shellMain(){
         typePrompt();
         command = readCommand(&command);
 
+        // Tokeniza por simbolos de pipes
         commands = split_command(command, PIPE_DELIM);
+        
+        // Procura pelo fim do programa
+        if (strcmp(command,"fim\n") == 0){
+            return;
+        }
+
 
         status = shell_execute(commands);
-        
         
 
         free(command);
