@@ -23,5 +23,6 @@ char **split_command(char *command, char *delim);
 
 int shell_execute(char **commands);
 int count_pipes(char **commands);
-
+int count_args(char **args);
+int is_valid_input(char **commands);
 #endif

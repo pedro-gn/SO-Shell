@@ -63,11 +63,35 @@ int count_pipes(char **commands){
     return count-1;
 }
 
+int count_args(char **args){
+    int count = 0;
+    for(int i = 0; args[i] != NULL; i++){
+        count++;
+    }
+    return count;
+}
+
+int is_valid_input(char **commands){
+    int count = 0;
+    while (commands[count] != NULL){
+        if(strcmp(commands[count], "\n") == 0){
+            return 0;
+        }
+        count++;
+    }
+
+    return 1;
+}
 
 int shell_execute(char **commands) {
     int status;
-
     int nPipes = count_pipes(commands); 
+
+    // Checa a sintaxe
+    if(!is_valid_input(commands)){
+        return 1;
+    }
+
     int **pipe_fds = malloc(nPipes * sizeof(int*));
 
     // Cria os pipes
@@ -79,10 +103,19 @@ int shell_execute(char **commands) {
         }
     }
 
+
     // Executa os comandos
     pid_t pid;
     for(int i = 0; commands[i] != NULL; i++){
         char **args = split_command(commands[i], SPACE_DELIM);
+
+        int numArgs = count_args(args);
+        int background = 0;
+
+        if(strcmp(args[numArgs-1], "&") == 0){
+            args[numArgs-1] = NULL;
+            background = 1;
+        }
 
         // Arquivos de redirecionamento
         int fd_in, fd_out;
@@ -145,6 +178,9 @@ int shell_execute(char **commands) {
             // Erro ao criar processo filho
             printf("Erro ao criar processo filho\n");
             return 1;
+        }
+        if(background == 1){
+            printf("Executando em background: %s\n", args[0]);
         }
         free(args);
     }
